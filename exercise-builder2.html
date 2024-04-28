@@ -35,7 +35,7 @@
 
     function EditableText(props){
       const [isEditable, setIsEditable] = React.useState(false);
-      const [text, setText] = React.useState("Text element");
+      const [text, setText] = React.useState("Text element " + props.text);
 
       return (
         <React.Fragment>
@@ -62,29 +62,74 @@
     }
 
     function List(props){
-      const [listArr, setListArr] = React.useState([<EditableText />, <EditableText />]);
-      const [nestIndex, setNestIndex] = React.useState(0)
+      const [listArr, setListArr] = React.useState([<EditableText text="1" />, <EditableText text="2" />]);
+      const [ins, setIns] = React.useState(0)
       let i = 0
       let j = 0
 
-      function recurse(arr){
-        return arr.map((e, indx, a) => (
-          <React.Fragment>
+      React.useEffect(() => {
+        
+      }, [])
+
+      function recurse(arr) {
+
+        return (
+          <ul>
+
+            {arr.map((e, indx, a) => (
+              <React.Fragment>
+                {Array.isArray(e) ? recurse(e) : (
+
+                  <React.Fragment>
+
+                    {indx === 0 ? (
+                      <React.Fragment>
+
+                        <button onClick={() => {
+                          a.push(<EditableText text={listArr.length + 1} />)
+                          props.setUpdt(!props.updt)
+                        }}>
+                          Add text element
+                        </button>
+
+                        <button onClick={() => {
+                          a.push([<EditableText text={listArr.length + 1} />])
+                          props.setUpdt(!props.updt)
+                        }}>
+                          Append Sub-list
+                        </button>
+
+                        
+
+                      </React.Fragment>
+                    ) : (
+                      null
+                    )}
+
+                    
+
+                    
+
+                    <li key={e}>{e}</li>
+
+                    <button onClick={() => {
+                      
+                      props.setUpdt(!props.updt)
+                    }}>
+                      Delete
+                    </button>
+                    
+                  </React.Fragment>
+                )}
+                {/*Array.isArray(e) ? recurse(e) : <li key={e}>{e}</li>*/}
+                
+
+                  
+              </React.Fragment>
+            ))}
             
-            <ul> 
-              <button onClick={() => {
-                a.push([<EditableText />])
-                props.setUpdt(!props.updt)
-              }}>
-                Add
-              </button>
-
-              {Array.isArray(e) ? recurse(e) : <li key={e}>{e}</li>}
-              
-            </ul>
-
-          </React.Fragment>
-        ))
+          </ul>
+        )
       }
 
       return (
