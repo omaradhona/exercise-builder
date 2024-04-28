@@ -26,11 +26,23 @@
     <script type="text/babel">
     
     function App() {
-      const [tst, setTst] = React.useState(false)
+      const [forceUpdate, setForceUpdate] = React.useState(false)
+      const [exerciseElements, setExerciseElements] = React.useState([])
 
-      return (
-        <List updt={tst} setUpdt={setTst} />
-      )
+      return <React.Fragment>
+        <button onClick={() => setExerciseElements([...exerciseElements, "e"])}>
+          Add Text
+        </button>
+        <button onClick={() => setExerciseElements([...exerciseElements, "l"])}>
+          Add Questions
+        </button>
+        {exerciseElements.map((e, i) => <React.Fragment key={i}>
+            {e === "e" ? <EditableText text={exerciseElements.length} /> : <List updt={forceUpdate} setUpdt={setForceUpdate} />}
+          </React.Fragment>)}
+        
+        {/*<List updt={forceUpdate} setUpdt={setForceUpdate} />*/}
+      </React.Fragment>
+
     }
 
     function EditableText(props){
@@ -63,37 +75,30 @@
 
     function List(props){
       const [listArr, setListArr] = React.useState([<EditableText text="1" />, <EditableText text="2" />]);
-      const [ins, setIns] = React.useState(0)
-      let i = 0
-      let j = 0
-
-      React.useEffect(() => {
-        
-      }, [])
 
       function recurse(arr) {
-
+        
         return (
           <ul>
 
-            {arr.map((e, indx, a) => (
+            {arr.map((e, indx, a) => 
               <React.Fragment>
-                {Array.isArray(e) ? recurse(e) : (
+                {Array.isArray(e) ? recurse(e) : 
 
                   <React.Fragment>
 
-                    {indx === 0 ? (
+                    {indx === 0 ? 
                       <React.Fragment>
 
                         <button onClick={() => {
-                          a.push(<EditableText text={listArr.length + 1} />)
+                          a.push(<EditableText text={a.length + 1} />)
                           props.setUpdt(!props.updt)
                         }}>
                           Add text element
                         </button>
 
                         <button onClick={() => {
-                          a.push([<EditableText text={listArr.length + 1} />])
+                          a.push([<EditableText text={a.length + 1} />])
                           props.setUpdt(!props.updt)
                         }}>
                           Append Sub-list
@@ -102,7 +107,7 @@
                         
 
                       </React.Fragment>
-                    ) : (
+                     : (
                       null
                     )}
 
@@ -110,23 +115,23 @@
 
                     
 
-                    <li key={e}>{e}</li>
+                    <li key={e.props.text}>{e}</li>
 
                     <button onClick={() => {
-                      
+                      a.splice(indx, 1) 
                       props.setUpdt(!props.updt)
                     }}>
                       Delete
                     </button>
                     
                   </React.Fragment>
-                )}
-                {/*Array.isArray(e) ? recurse(e) : <li key={e}>{e}</li>*/}
+                }
+                
                 
 
                   
               </React.Fragment>
-            ))}
+            )}
             
           </ul>
         )
