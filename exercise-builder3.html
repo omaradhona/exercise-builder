@@ -28,30 +28,48 @@
     function App() {
       const [forceUpdate, setForceUpdate] = React.useState(false)
       const [exerciseElements, setExerciseElements] = React.useState([])
+      const [inputId, setInputId] = React.useState(null)
+
+      function handleDelete(deletedSectionId){
+        setExerciseElements(exerciseElements.filter((a, j) => j !== deletedSectionId).map(k => k))
+      }
 
       return <React.Fragment>
-        <button onClick={() => setExerciseElements([...exerciseElements, "e"])}>
-          Add Text
-        </button>
-        <button onClick={() => setExerciseElements([...exerciseElements, "l"])}>
-          Add Questions
-        </button>
-        {exerciseElements.map((e, i) => <React.Fragment key={i}>
-            {e === "e" ? <EditableText text={exerciseElements.length} /> : <List updt={forceUpdate} setUpdt={setForceUpdate} />}
-          </React.Fragment>)}
-        
+        <div>
+          <button onClick={() => setExerciseElements([...exerciseElements, {id: crypto.randomUUID(), type: "text"}])}>
+            Add Text
+          </button>
+          <button onClick={() => setExerciseElements([...exerciseElements, {id: crypto.randomUUID(), type: "list"}])}>
+            Add Questions
+          </button>
+        </div>
+        {exerciseElements.map((e, i) => <React.Fragment key={e.id}>
+          {e.type === "text" ? 
+            <EditableText
+              text={exerciseElements.length}
+              id={e.id}
+              st={(id) => setInputId(id)}
+              forgetId={() => setInputId(null)}
+            /> 
+            :
+            <List updt={forceUpdate} setUpdt={setForceUpdate} setInputId={setInputId} inputId={inputId} />
+          }
+          <button onClick={() => setExerciseElements(exerciseElements.filter((a, j) => j !== i).map(k => k))}>
+            Delete Section
+          </button>
+          <br />
+        </React.Fragment>)}
+
         {/*<List updt={forceUpdate} setUpdt={setForceUpdate} />*/}
       </React.Fragment>
 
     }
 
     function EditableText(props){
-      const [isEditable, setIsEditable] = React.useState(false);
+      const [isEditable, setIsEditable] = React.useState(props.isEditable);
       const [text, setText] = React.useState(props.text);
       
-      React.useEffect(() => {
-        setIsEditable(true)
-      }, [text])
+      
 
       return (
         <React.Fragment>
@@ -62,10 +80,14 @@
                 setText(e.target.value)
                 props.st(props.id)
               }}
-              onBlur={() => setIsEditable(false)}
+              onBlur={() => {
+                setIsEditable(false)
+                props.forgetId()
+              }}
               value={text}
               autoFocus
               id={props.id}
+              
             />
           ) : (
             <React.Fragment>
@@ -86,6 +108,7 @@
         {id: crypto.randomUUID(), text: "1"},
         {id: crypto.randomUUID(), text: "2"}
       ]);
+      const [inputId, setInputId] = React.useState(null)
 
       function recurseUpdateArray(x, id, updatedText){
         return x.map(e => {
@@ -107,15 +130,20 @@
         //console.log(nestedRef.current.children[2].children[0].value)
         //alert(nestedRef.current.children)
         //console.log(document.getElementById(x).value)
+        props.setInputId(x)
+
         const updatedText = document.getElementById(x).value
         
 
+
         setListArr(recurseUpdateArray(listArr, x, updatedText))
-        console.log(listArr)
+        //console.log(listArr)
       }      
 
       
-
+      function forgetId(){
+        props.setInputId(null)
+      }
       
 
       function recurse(arr) {
@@ -124,7 +152,7 @@
           <ul>
 
             
-
+            
             {arr.map((e, indx, a) => 
               <React.Fragment key={indx}>
                 {Array.isArray(e) ? recurse(e) : 
@@ -160,7 +188,13 @@
                     
 
                     <li key={e.text}>
-                      <EditableText text={e.text} id={e.id} st={st} />
+                        <EditableText
+                          text={e.text}
+                          id={e.id}
+                          st={st}
+                          isEditable={e.id === props.inputId ? true : false}
+                          forgetId={forgetId}
+                      />
                       
                       
                       
@@ -184,6 +218,7 @@
             
           </ul>
         )
+        
       }
 
       return (
