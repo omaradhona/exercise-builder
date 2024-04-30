@@ -13,6 +13,42 @@
     .editable-text{
       cursor: pointer;
       width: fit-content;
+      padding: 12px 0px;
+      margin-top: 8px;
+      border: 2px solid transparent;
+      transition: 0.3s;
+    }
+
+    .editable-text:hover{
+      border: 2px solid blue;
+      transition: 0.3s;
+    }
+
+    ul{
+      width: fit-content;
+      border: 2px solid transparent;
+      transition: 0.3s;
+      list-style-type: decimal;
+    }
+
+    ul > ul{
+      list-style-type: lower-latin;
+    }
+
+    ul > ul > ul{
+      list-style-type: disc;
+    }
+
+    li{
+      width: fit-content;
+      border: 2px solid transparent;
+      transition: 0.3s;
+    }
+
+    
+
+    textarea{
+      resize: none;
     }
   </style>
 
@@ -55,6 +91,14 @@
         }))
       }
 
+      function onHoverDelete(element){
+        element.target.previousElementSibling.style.border = "2px solid red";
+      }
+      
+      function outHoverDelete(element){
+        element.target.previousElementSibling.style.border = "";
+      }
+
       return <React.Fragment>
         <div>
           <button onClick={() => setExerciseElements([
@@ -93,10 +137,9 @@
               updateQuestionsSection={updateQuestionsSection}
             />
           }
-          <button onClick={() => handleDelete(i)}>
+          <button onClick={() => handleDelete(i)} onMouseEnter={onHoverDelete} onMouseLeave={outHoverDelete}>
             Delete Section
           </button>
-          <br />
         </React.Fragment>
         )}
         {console.log(exerciseElements)}
@@ -114,8 +157,8 @@
       return (
         <React.Fragment>
           {isEditable ? (
-            <input
-              type="text"
+            <textarea
+              className="w-100"
               onChange={(e) => {
                 setText(e.target.value)
                 props.nestedArray ? props.updateLocalArray(props.id) : props.updateMainArray(e.target.value, props.index)
@@ -127,18 +170,19 @@
               value={text}
               autoFocus
               id={props.id}
-              
-            />
+            >
+            </textarea>
           ) : (
-            <React.Fragment>
-              <span onClick={() => setIsEditable(true)} className="editable-text me-5">
-                {text}
-              </span>
+            
               
-            </React.Fragment>
+              <p onClick={() => setIsEditable(true)} className="editable-text me-5">
+                {text}
+              </p>
+              
+            
           )}
           
-          <br />
+          
         </React.Fragment>
       )
     }
@@ -190,7 +234,14 @@
       function forgetId(){
         setInputId(null)
       }
+
+      function onHoverDelete(element){
+        element.target.previousElementSibling.style.border = "2px solid red";
+      }
       
+      function outHoverDelete(element){
+        element.target.previousElementSibling.style.border = "2px solid transparent";
+      }
 
       function recurse(arr) {
         
@@ -211,7 +262,8 @@
                         <button onClick={() => {
                           a.push({id: crypto.randomUUID(), text: a.length + 1})
                           props.setUpdt(!props.updt)
-                        }}>
+                        }}
+                        className="mt-2">
                           Add text element
                         </button>
 
@@ -250,7 +302,8 @@
                     <button onClick={() => {
                       a.splice(indx, 1) 
                       props.setUpdt(!props.updt)
-                    }}>
+                    }}
+                    onMouseEnter={onHoverDelete} onMouseLeave={outHoverDelete}>
                       Delete
                     </button>
                     
