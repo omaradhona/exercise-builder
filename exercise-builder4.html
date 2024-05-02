@@ -50,6 +50,72 @@
     textarea{
       resize: none;
     }
+
+    #file-input{
+      display: none;
+    }
+
+    label{
+      position: relative;
+      left: -8px;
+      top: -3px;
+      width: 116%;
+      margin-bottom: -6px;
+      cursor: pointer;
+    }
+
+    .exo-images div img{
+      width: 100%;
+    }
+
+    .figures{
+      width: 25%;
+    }
+
+    .exercise-section{
+      display: flex;
+      width: 100%;
+    }
+
+    .exo-pics-top{
+      flex-direction: column-reverse;
+    }
+
+    .exo-pics-bottom{
+      flex-direction: column;
+    }
+
+    .exo-pics-left{
+      flex-direction: row-reverse;
+    }
+
+    .exo-pics-left .exo-images, .exo-pics-right .exo-images{
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .exo-pics-left .exo-images div img, .exo-pics-right .exo-images div img{
+      width: initial;
+      height: 300px;
+    }
+
+    .exo-pics-left .exercise-text, .exo-pics-right .exercise-text{
+      width: 100%;
+    }
+
+    .exo-pics-left .figures, .exo-pics-right .figures{
+      width: 100%;
+    }
+
+    .exo-pics-right{
+      flex-direction: row;
+    }
+
+    .exo-images{
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
   </style>
 
   <body>
@@ -64,9 +130,11 @@
     function App() {
       const [forceUpdate, setForceUpdate] = React.useState(false)
       const [exerciseElements, setExerciseElements] = React.useState([])
+      const [images, setImages] = React.useState([])
+      const [exoClass, setExoClass] = React.useState("exo-pics-bottom")
 
       function handleDelete(deletedSectionIndex){
-        setExerciseElements(exerciseElements.filter((a, j) => j !== deletedSectionIndex).map(k => k))
+        setExerciseElements(exerciseElements.filter((a, j) => j !== deletedSectionIndex))
       }
 
       function updateMainArray(updatedText, index){
@@ -99,6 +167,38 @@
         element.target.previousElementSibling.style.border = "";
       }
 
+      const handleFile = async (e) => {
+        const file = e.target.files[0]
+        console.log(file)
+        const fileReader = new FileReader()
+        console.log(fileReader)
+        fileReader.readAsDataURL(file)
+        fileReader.onload = () => {
+          const result = fileReader.result
+          setImages([ ...images, { id: crypto.randomUUID(), name: file.name, data: result } ])
+        }
+      }
+
+      function picsTop(){
+        setExoClass("exo-pics-top")
+      }
+
+      function picsBottom(){
+        setExoClass("exo-pics-bottom")
+      }
+
+      function picsLeft(){
+        setExoClass("exo-pics-left")
+      }
+
+      function picsRight(){
+        setExoClass("exo-pics-right")
+      }
+
+      function deleteFigure(j){
+        setImages(images.filter((e, i) => i !== j))
+      }
+
       return <React.Fragment>
         <div>
           <button onClick={() => setExerciseElements([
@@ -119,33 +219,61 @@
           ])}>
             Add Questions
           </button>
+          <input
+            type="file"
+            name="file"
+            id="file-input"
+            onChange={handleFile}
+          />
+          <button>
+            <label htmlFor="file-input">Upload Image</label>
+          </button>
+          <button onClick={picsTop}>pictures top</button>
+          <button onClick={picsBottom}>pictures bottom</button>
+          <button onClick={picsLeft}>pictures left</button>
+          <button onClick={picsRight}>pictures right</button>
         </div>
 
-        {exerciseElements.map((e, i) => <React.Fragment key={e.id}>
-          {e.type === "text" ?
-            <EditableText
-              text={e.text}
-              index={i}
-              nestedArray={false}
-              updateMainArray={updateMainArray}
-            />
-            :
-            <List
-              updt={forceUpdate}
-              setUpdt={setForceUpdate}
-              index={i}
-              updateQuestionsSection={updateQuestionsSection}
-            />
-          }
-          <button onClick={() => handleDelete(i)} onMouseEnter={onHoverDelete} onMouseLeave={outHoverDelete}>
-            Delete Section
-          </button>
-        </React.Fragment>
-        )}
+        <div className={"p-5 exercise-section " + exoClass}>
+          <div className="exercise-text border p-2">
+            {exerciseElements.map((e, i) => <React.Fragment key={e.id}>
+              {e.type === "text" ?
+                <EditableText
+                  text={e.text}
+                  index={i}
+                  nestedArray={false}
+                  updateMainArray={updateMainArray}
+                />
+                :
+                e.type === "questions" ?
+                  <List
+                    updt={forceUpdate}
+                    setUpdt={setForceUpdate}
+                    index={i}
+                    updateQuestionsSection={updateQuestionsSection}
+                  />
+                  :
+                  null
+              }
+              <button onClick={() => handleDelete(i)} onMouseEnter={onHoverDelete} onMouseLeave={outHoverDelete}>
+                Delete Section
+              </button>
+            </React.Fragment>
+            )}
+          </div>
+          <div className="exo-images border">
+            {images.map((e, i) =>
+              <div className="figures d-flex flex-column border">
+                <img src={e.data} />
+                <strong className="text-center border">Figure {i + 1}</strong>
+                <button onClick={() => deleteFigure(i)}>Delete</button>
+              </div>
+            )}
+          </div>
+        </div>
         {console.log(exerciseElements)}
         {/*<List updt={forceUpdate} setUpdt={setForceUpdate} />*/}
       </React.Fragment>
-
     }
 
     function EditableText(props){
